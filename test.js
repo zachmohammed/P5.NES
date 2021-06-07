@@ -12,6 +12,7 @@ function setup() {
     
     mappertest = new mapperobject1(romfile);
     cpu = new NESCPU(mappertest)
+    ppu = new NESPPU(mappertest, cpu)
 }
   
 function draw() {
