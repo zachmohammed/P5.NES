@@ -1,12 +1,14 @@
 class NESPPU {
-    constructor(mapper, cpu){
+    constructor(mapper, cpu, palette){
         this.mapper = mapper
         this.localcpu = cpu
+        this.palette = palette
         this.cycle = 0
         this.scanline = 0
         this.frame = 0
 
-
+        this.front = []
+        this.back = []
         // storage varaibles 
         this.paletteData = []
         this.nameTableData = []
@@ -45,6 +47,15 @@ class NESPPU {
         this.flagBackgroundTable = 0
         this.flagSpriteSize = 0
         this.flagMasterSlave = 0
+
+        this.flagGrayscale = 0
+        this.flagShowLeftBackground = 0
+        this.flagShowLeftSprites = 0
+        this.flagShowsBackground = 0
+        this.flagShowSprites = 0
+        this.flagRedTint = 0
+        this.flagGreenTint = 0
+        this.flagBlueTint = 0
 
         this.flagSpriteZeroHit = 0
         this.flagSpriteOverflow = 0
@@ -285,6 +296,92 @@ class NESPPU {
 
         this.tileData |= this.data
     }
-    
+
+    fetchTileData(){
+        return (this.tileData >> 32)
+    }
+
+    backgroundPixel(){
+        if(this.flagShowsBackground == 0){
+            return 0
+        }
+
+        this.data = this.fetchTileData() >> ((7 - this.x) * 4)
+        return this.data & 0x0F
+    }
+
+    spritePixel(){
+        if(this.flagShowSprites == 0){
+            return 0,0
+        }
+
+        for(i = 0; i < this.spriteCount; i++){
+            this.offset = (this.cycle - 1) - (this.spritePositions[i])
+            if(this.offset < 0 || this.offest > 7){
+                continue
+            }
+            this.offset = 7 - this.offset
+            this.color = ((this.spritePatterns[i]) >> ((this.offset * 4) & 0x0F))
+
+            if(this.color%4 == 0){
+                continue
+            }
+
+            return i, this.color
+        }
+    }
+
+    renderPixel(){
+        this.x = this.Cycle - 1
+        this.y = this.scanline
+
+        this.background = this.backgroundPixel()
+        this.i, this.sprite = this.spritePixel()
+
+        if(this.x < 8 && this.flagShowLeftBackground == 0){
+            this.background = 0 
+        }
+
+        if(this.x < 8 && this.flagShowLeftSprites == 0){
+            this.sprite = 0
+        }
+        
+        this.b = this.background%4 != 0 
+        this.s = this.sprite%4 != 0
+
+        this.color = this.color
+
+        if(!this.b && !this.s){
+            this.color = 0
+        }
+        else if(!this.b && this.s){
+            this.color = this.sprite | 0x10
+        }
+        else if(this.b && !this.s){
+            this.color = this.background
+        }
+        else{
+            if(this.spriteIndexes[this.i] == 0 && x < 255){
+                this.flagSpriteZeroHit = 1
+            }
+
+            if(this.spritePriorities[i] == 0){
+                this.color = this.sprite | 0x10
+            }
+            else{
+                this.color = this.background
+            }
+        }
+   
+        
+        
+        this.c = this.palette.colourdict[((this.color%64).toString())]
+        this.back.push([this.x, this.y, this.cs])
+
+    }
+
+    fetchSpritePattern(i, row){
+        
+    }
 
 }
