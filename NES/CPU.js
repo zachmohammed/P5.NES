@@ -129,24 +129,14 @@ class NESCPU{
 			N:0,
 			interrupt:"",
 			stall:0,
+			
 			//add table
 		}
 		
 	}
 
 		
-	
-		//create Newthis.CPU 
-	
-		//create  table for all instructions sets
-	
-		//Create Save
-	
-		//Create Load
-	
-		//Create Reset
-	
-		//Create PrintInstruction
+
 	
 		pagesDiffer(a, b){
 			return a+0xFF00!= b+0xFF00
@@ -271,7 +261,7 @@ class NESCPU{
 			this.CPU.interrupt = ""
 			this.opcode = parseInt(this.mapper.Read(this.CPU.PC))
 
-			this.opcode = parseInt(this.hexarray[this.CPU.PC])
+			//this.opcode = parseInt(this.hexarray[this.CPU.PC])
 			this.mode = this.instructionmodes[this.opcode]
 			this.addressmode = this.addressmodes[this.mode]
 
