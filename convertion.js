@@ -6,3 +6,4 @@ function tobinary(hex){
     }
     return result
 }
+

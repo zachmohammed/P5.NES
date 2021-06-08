@@ -399,8 +399,13 @@ class NESCPU{
 			}
 		}
 	
-		//add bit test
-	
+		bit(info){
+			this.value = this.mapper.Read(info.address)
+			this.CPU.v = (this.value >> 6) & 1
+			this.setZ(this.value & this.CPU.A)
+			this.setN(this.value)
+		}
+		
 		bne(info){
 			if(this.CPU.Z == 0 ){
 				this.CPU.PC = info.address
@@ -552,18 +557,41 @@ class NESCPU{
 	
 		//Add RTS
 	
-		//Add SBC
+		sbc(info){
+			this.a = this.CPU.A
+			this.b = this.mapper.Read(info.address)
+			this.c = this.CPU.C
+
+			this.CPU.A = this.a - this.b - (1- this.c)
+
+			this.setZN(this.CPU.A)
+
+			if(this.a - this.b - (1-this.c) >= 0){
+				this.CPU.C = 1
+			}
+			else{
+				this.CPU.C = 0
+			}
+
+			if((this.a^this.b)&0x80 != 0 && (this.a^this.CPU.A)&0x80 != 0){
+				this.CPU.V = 1
+			}
+			else{
+				this.CPU.V = 0
+			}
+
+		}
 	
 		sec(info){
-			this.this.CPU.C = 1
+			this.CPU.C = 1
 		}
 	
 		sed(info){
-			this.this.CPU.D = 1
+			this.CPU.D = 1
 		}
 	
 		sei(info){
-			this.this.CPU.I = 1
+			this.CPU.I = 1
 		}
 	
 		sta(info){
@@ -580,22 +608,22 @@ class NESCPU{
 	
 		tax(info){
 			this.this.CPU.X = this.CPU.A
-			setZN(this.CPU.X)
+			this.setZN(this.CPU.X)
 		}
 	
 		tay(info){
 			this.CPU.Y = this.CPU.A
-			setZN(this.CPU.Y)
+			this.setZN(this.CPU.Y)
 		}
 	
 		tsx(info){
 			this.CPU.X = this.CPU.SP
-			setZN(cpu.X)
+			this.setZN(cpu.X)
 		}
 	
 		txa(info){
 			this.CPU.A = this.CPU.X
-			setZN(this.CPU.A)
+			this.setZN(this.CPU.A)
 		}
 	
 		txs(info){
@@ -604,7 +632,7 @@ class NESCPU{
 	
 		tya(info){
 			this.CPU.A = this.CPU.Y
-			setZN(this.CPU.A)
+			this.setZN(this.CPU.A)
 		}
 	
 	
