@@ -135,7 +135,12 @@ class NESCPU{
 		
 	}
 
-		
+		reset(){
+			this.CPU.PC = this.Read16(0xFFFC)
+			this.SP = 0xFD
+
+			//set flags
+		}
 
 	
 		pagesDiffer(a, b){
@@ -259,12 +264,10 @@ class NESCPU{
 			}
 
 			this.CPU.interrupt = ""
-			this.opcode = parseInt(this.mapper.Read(this.CPU.PC))
-
-			//this.opcode = parseInt(this.hexarray[this.CPU.PC])
+			this.opcode = (parseInt("0x" +this.mapper.Read(this.CPU.PC)))
+			
 			this.mode = this.instructionmodes[this.opcode]
 			this.addressmode = this.addressmodes[this.mode]
-
 			this.stepinfo = new stepInfo()
 			this.pagecrossed = null
 			
@@ -318,7 +321,6 @@ class NESCPU{
 					this.stepinfo.address = this.mapper.Read((this.CPU.PC+1)+this.CPU.Y) & 0xff
 					break
 			}
-
 			this.CPU.PC += this.instructionsizes[this.opcode]
 			this.CPU.Cycles += this.instructionsizes[this.opcode]
 			if(this.pagecrossed){
@@ -326,11 +328,13 @@ class NESCPU{
 			}
 
 			this.stepinfo = new stepInfo(this.stepinfo.address, this.CPU.PC,this.mode)
-
+			print(this.opcode)
 			this.instructname = this.instructionnames[this.opcode]
-			this.instructname = this.instructname.toLowerCase()
 			print(this.instructname)
-			print(this.stepinfo)
+			this.instructname = this.instructname.toLowerCase()
+
+
+
 			eval("this." +this.instructname + "(this.stepinfo)")
 		}
 
