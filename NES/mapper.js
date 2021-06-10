@@ -12,18 +12,22 @@ class mapperobject1{
     
     Read(readaddress){
         if(readaddress < 0x2000){
+            //print("Reading CHR")
             return parseInt(this.romfile.chr[readaddress])
         }
         else if(readaddress >= 0xC000){
-            this.index = this.prgBank2*0x4000 + (readaddress-0xC000)
-            return parseInt(this.romfile.prg[this.index])
+            //print("Reading PRG 1")
+            this.index = this.prgBank2*0x4000 + parseInt(readaddress-0xC000)
+            return (this.romfile.prg[this.index])
         }
     
         else if(readaddress >= 0x8000){
+            //print("Reading PRG 2")
             this.index = this.prgBank1*0x4000 + (readaddress-0x8000)
             return parseInt(this.romfile.prg[this.index])
         }
         else if(readaddress >= 0x6000){
+            //print("Reading Sram")
             this.index = readaddress - 0x6000
             return parseInt(this.romfile.sram[this.index])
         }

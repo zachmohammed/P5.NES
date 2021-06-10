@@ -8,16 +8,19 @@ function setup() {
     createCanvas(400, 400);
 
     romfile = LoadNESFile(rom)
-
+    ram = []
     
     mappertest = new mapperobject1(romfile);
     palette = new paletteTable()
-    cpu = new NESCPU(mappertest)
+    memory = new cpumemory(ram, mappertest)
+
+    cpu = new NESCPU(memory)
     ppu = new NESPPU(mappertest, cpu, palette)
+    cpu.reset()
 }
   
 function draw() {
-    cpu.step()
+    //cpu.step()
     background(220);
     noStroke()
     

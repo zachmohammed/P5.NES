@@ -136,9 +136,9 @@ class NESCPU{
 	}
 
 		reset(){
-			this.CPU.PC = this.Read16(0xFFFC)
+			this.CPU.PC = 0xC79E
 			this.SP = 0xFD
-
+			this.setflags(0x24)
 			//set flags
 		}
 
@@ -149,7 +149,7 @@ class NESCPU{
 	
 		addBranchCycles(info){
 			this.CPU.Cycles++;
-			if (pagesDiffer(info.pc, info.address) == true){
+			if (this.pagesDiffer(info.pc, info.address) == true){
 				this.CPU.Cycles++;
 			}
 		}
@@ -168,6 +168,7 @@ class NESCPU{
 		Read16(address){
 			this.lo = parseInt(this.mapper.Read(address))
 			this.hi = parseInt(this.mapper.Read(address + 1))
+
 			return this.hi<<8 | this.lo
 		}
 	
@@ -191,10 +192,10 @@ class NESCPU{
 		}
 	
 		push16(value){
-			hi = value >> 8
-			lo = value & 0xFF
-			this.push(hi)
-			this.push(lo)
+			this.hi = value >> 8
+			this.lo = value & 0xFF
+			this.push(this.hi)
+			this.push(this.lo)
 		}
 	
 		pull16(){
@@ -202,12 +203,31 @@ class NESCPU{
 			high = this.pull()
 			return hi<<8 | lo
 		}
+
+		setflags(flags){
+			this.CPU.C = (flags >> 0) & 1
+			this.CPU.Z = (flags >> 1) & 1
+			this.CPU.I = (flags >> 2) & 1
+			this.CPU.D = (flags >> 3) & 1
+			this.CPU.B = (flags >> 4) & 1
+			this.CPU.U = (flags >> 5) & 1
+			this.CPU.V = (flags >> 6) & 1
+			this.CPU.N = (flags >> 7) & 1
+		}
 	
 
 	
 		flags(){
 			var flags
-			
+			flags |= this.CPU.C << 0
+			flags |= this.CPU.Z << 1
+			flags |= this.CPU.I << 2
+			flags |= this.CPU.D << 3
+			flags |= this.CPU.B << 4
+			flags |= this.CPU.U << 5
+			flags |= this.CPU.V << 6
+			flags |= this.CPU.N << 7
+			return flags
 		}
 	
 	
@@ -264,8 +284,8 @@ class NESCPU{
 			}
 
 			this.CPU.interrupt = ""
-			this.opcode = (parseInt("0x" +this.mapper.Read(this.CPU.PC)))
 			
+			this.opcode = (parseInt(this.mapper.Read(this.CPU.PC)))
 			this.mode = this.instructionmodes[this.opcode]
 			this.addressmode = this.addressmodes[this.mode]
 			this.stepinfo = new stepInfo()
@@ -273,7 +293,8 @@ class NESCPU{
 			
 			switch(this.addressmode){
 				case "modeAbsolute":
-					this.stepinfo.address = this.Read16(this.CPU.PC + 1)
+					this.newpc = (parseInt(this.CPU.PC) + 1)
+					this.stepinfo.address = this.Read16(this.newpc)
 					break
 				case "modeAbsoluteX":
 					this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.X
@@ -303,13 +324,16 @@ class NESCPU{
 					this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.Y, this.stepinfo.address)
 					break
 				case "modeRelative":
-					this.offset = this.mapper.Read(this.CPU.PC + 1)
+					this.offset = parseInt(this.mapper.Read(this.CPU.PC + 1))
+					print(this.CPU.PC)
+					print(this.offset)
 					if(this.offset < 0x80){
-						this.stepinfo.address = this.CPU.PC + 2 + offset
+						this.stepinfo.address = this.CPU.PC + 2 + this.offset
 					}
 					else{
-						this.stepinfo.address = this.CPU.PC + 2 + offset - 0x100
+						this.stepinfo.address = this.CPU.PC + 2 + this.offset - 0x100
 					}
+					
 					break
 				case "modeZeroPage":
 					this.stepinfo.address = this.mapper.Read(this.CPU.PC + 1)
@@ -328,9 +352,9 @@ class NESCPU{
 			}
 
 			this.stepinfo = new stepInfo(this.stepinfo.address, this.CPU.PC,this.mode)
-			print(this.opcode)
+		
 			this.instructname = this.instructionnames[this.opcode]
-			print(this.instructname)
+			print("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode)
 			this.instructname = this.instructname.toLowerCase()
 
 
@@ -378,14 +402,18 @@ class NESCPU{
 			}
 		}
 	
-		// Add Logical and
+		and(info){
+			this.CPU.A = this.CPU.A & this.mapper.Read(info.address)
+			print(this.CPU.A)
+			this.setZN(this.CPU.A)
+		}
 	
 		// Add ASL
 	
 		bcc(info){
 			if(this.CPU.C == 0){
 				this.CPU.pc = info.address
-				addBranchCycles(info)
+				this.addBranchCycles(info)
 			}
 		}
 	
@@ -399,7 +427,14 @@ class NESCPU{
 		beq(info){
 			if(this.CPU.Z != 0 ){
 				this.CPU.PC = info.address
-				addBranchCycles(info)
+				this.addBranchCycles(info)
+			}
+		}
+
+		bmi(info){
+			if(this.CPU.N != 0){
+				this.CPU.PC = info.address
+				this.addBranchCycles(info)
 			}
 		}
 	
@@ -424,7 +459,12 @@ class NESCPU{
 			}
 		}
 	
-		// Add BRK
+		brk(info){
+			this.push16(this.CPU.PC)
+			this.php(info)
+			this.sei(info)
+			this.CPU.PC = this.Read16(0xFFFE)
+		}
 	
 		bvc(info){
 			if(this.CPU.V == 0){
@@ -547,7 +587,9 @@ class NESCPU{
 	
 		//Add PHA
 	
-		//Add PHP
+		php(info){
+			this.push(this.flags() | 0x10)
+		}
 	
 		//Add PLA
 	
