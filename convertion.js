@@ -7,3 +7,7 @@ function tobinary(hex){
     return result
 }
 
+function tohex(hex){
+    hex = hex(hex).slice(6)
+    return hex
+}
