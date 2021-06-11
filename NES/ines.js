@@ -40,13 +40,16 @@ function LoadNESFile(romdata){
 
     battery =(header.Control1 >> 1) & 1
     currentlocation = 16
+
+    prg_length = header.NumPRG * 16384
+    chr_length = header.NumCHR * 8192
     
-    prg = bytearray(GetHex(currentlocation,header.NumPRG*16384,romdata))
+    prg = bytearray(GetHex(currentlocation,currentlocation + prg_length,romdata))
+    print(prg)
+    currentlocation += prg_length
 
-    currentlocation = header.NumPRG*16384;
-
-    chr = bytearray(GetHex(currentlocation,header.NumCHR*8192 + currentlocation,romdata))
-    print(mapper)
+    chr = bytearray(GetHex(currentlocation,currentlocation + chr_length - 1,romdata))
+    print(chr)
     return new NewCartridge(prg,chr,mapper,mirror,battery)
 }
 

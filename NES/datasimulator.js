@@ -1,8 +1,9 @@
 function bytearray(toconvert){
     returnarray = [];
-    for(i =0; i < toconvert.length/2;i++){
-        returnarray.push("0x" +toconvert[i] + toconvert[i+1]);
+    for(var i = 0, charsLength = toconvert.length; i < charsLength; i+=2){
+        returnarray.push("0x" + toconvert.substring(i, i+2));
     }
+
     return returnarray;
 }
 
