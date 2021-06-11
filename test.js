@@ -8,14 +8,16 @@ function setup() {
     createCanvas(400, 400);
 
     romfile = LoadNESFile(rom)
-    ram = []
     
-    mappertest = new mapperobject1(romfile);
+    
+    //mappertest = new mapperobject1(romfile);
     palette = new paletteTable()
-    memory = new cpumemory(ram, mappertest)
+    console = new nesconsole(romfile)
+    ppu = new NESPPU(mappertest, cpu, palette)
+    memory = new cpumemory(ram, mappertest, ppu)
 
     cpu = new NESCPU(memory)
-    ppu = new NESPPU(mappertest, cpu, palette)
+    
     cpu.reset()
 }
   

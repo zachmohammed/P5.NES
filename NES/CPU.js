@@ -560,7 +560,10 @@ class NESCPU{
 		}
 	
 		lda(info){
+			print("Address: " + info.address)
+			print("A: " +this.mapper.Read(info.address))
 			this.CPU.A = this.mapper.Read(info.address)
+			
 			this.setZN(this.CPU.A)
 		}
 

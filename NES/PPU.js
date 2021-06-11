@@ -75,28 +75,59 @@ class NESPPU {
     }
 
     readPalette(address){
-        if(this.address >= 16 && this.address%4 == 0){
+        if(address >= 16 && address%4 == 0){
             address -= 16
         }
         return this.paletteData[address]
     }
     
-    writePalette(address){
+    writePalette(address, value){
+        if(address >= 16 && address%4 == 0){
+            address -=16
+        }
+        this.paletteData[1] = value
+    }
+    
+
+    readRegister(address){
         if(address == 0x2002){
-            //read status
+            return this.readStatus()
         }
         else if (address == 0x2004){
-            //read oamdata
+           return this.readOAMData()
         }
         else if(address == 0x2007){
-            //read data
+            return this.read.readData()
         }
         else{
             return 0
         }
     }
-
-    //add write register
+    
+    writeRegister(address, value){
+        this.register = value
+        if(address == 0x2000){
+            this.writeControl(value)
+        }
+        else if(address == 0x2001){
+            this.writeMask(value)
+        }
+        else if(address == 0x2003){
+            this.writeOamAddress(value)
+        }
+        else if(address == 0x2004){
+            this.writeOamData(value)
+        }
+        else if(address == 0x2005){
+            this.writeScroll(value)
+        }
+        else if(address == 0x2007){
+            this.writeData(value)
+        }
+        else if(address == 0x4014){
+            this.writeDMA(value)
+        }
+    }
 
     writeControl(value){
         this.flagNameTable = (value >> 0) & 3
@@ -106,13 +137,20 @@ class NESPPU {
         this.flagSpriteSize = (value >> 5) & 1
         this.flagMasterSlave = (value >> 6) & 1
         this.nmiOutput = (value>>7)&1 ==1
-        //this.PPU.nmichange()
+        this.nmiChange()
 
         this.t = (this.t & 0xF3FF) | (((value) & 0x03) << 10)
     }
 
     writeMask(value){
-        //todo
+        this.flagGrayscale = (value >> 0) & 1
+        this.flagShowLeftBackground = (value >> 1) & 1
+        this.flagShowLeftSprites = (value >> 2) & 1
+        this.flagShowsBackground = (value >> 3) & 1
+        this.flagShowSprites = (value >> 4) & 1
+        this.flagRedTint = (value >> 5) & 1
+        this.flagGreenTint = (value >> 6) & 1
+        this.flagBlueTint = (value >> 7) & 1
     }
 
     readStatus(){
@@ -124,9 +162,13 @@ class NESPPU {
         }
 
         this.nmiOccurred = false
-        //this.PPU.nmiChange()
+        this.nmiChange()
         this.w = 0
         return result
+    }
+
+    writeOamAddress(value){
+        this.oamAddress = value
     }
 
     readOAMData(){
@@ -169,9 +211,14 @@ class NESPPU {
         value = this.read
     }
 
-    writeData(){
-
-
+    writeData(value){
+        this.mapper.write(this.v, value)
+        if(this.flagIncrement == 0){
+            this.v += 1
+        }
+        else{
+            this.v += 32
+        }
     }
 
 
