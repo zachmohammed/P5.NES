@@ -9,15 +9,16 @@ function setup() {
 
     romfile = LoadNESFile(rom)
     
-    
-    //mappertest = new mapperobject1(romfile);
-    palette = new paletteTable()
-    console = new nesconsole(romfile)
-    ppu = new NESPPU(mappertest, cpu, palette)
-    memory = new cpumemory(ram, mappertest, ppu)
+    ram = []
+    mapper = new mapperobject1(romfile);
 
-    cpu = new NESCPU(memory)
     
+    ppu = new NESPPU(null, null, new paletteTable())
+    cpumem = new cpumemory(ram, mapper, ppu)
+    cpu = new NESCPU(cpumem)
+    ppumem = new ppumemory(mapper, romfile, ppu)
+    ppu.localcpu = this.cpu
+    ppu.mapper = ppumem
     cpu.reset()
 }
   

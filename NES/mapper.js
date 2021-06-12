@@ -38,7 +38,7 @@ class mapperobject1{
     
     Write(address, value){
         this.hexvalue = convertbyte(value)
-
+        print(value)
         if(address < 0x2000){
             this.romfile.chr[address] = this.hexvalue
         }
@@ -50,7 +50,7 @@ class mapperobject1{
             this.romfile.sram[index] = this.hexvalue
         }
         else{
-            print("Fail writing at: " + this.address)
+            print("Fail writing at: " + address)
         }
     }
 }

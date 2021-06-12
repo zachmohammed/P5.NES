@@ -45,11 +45,11 @@ function LoadNESFile(romdata){
     chr_length = header.NumCHR * 8192
     
     prg = bytearray(GetHex(currentlocation,currentlocation + prg_length,romdata))
-    print(prg)
+
     currentlocation += prg_length
 
     chr = bytearray(GetHex(currentlocation,currentlocation + chr_length - 1,romdata))
-    print(chr)
+ 
     return new NewCartridge(prg,chr,mapper,mirror,battery)
 }
 

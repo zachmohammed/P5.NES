@@ -136,6 +136,7 @@ class NESCPU{
 	}
 
 		reset(){
+
 			this.CPU.PC = 0xC79E
 			this.SP = 0xFD
 			this.setflags(0x24)
@@ -286,65 +287,67 @@ class NESCPU{
 			this.CPU.interrupt = ""
 			
 			this.opcode = (parseInt(this.mapper.Read(this.CPU.PC)))
+
 			this.mode = this.instructionmodes[this.opcode]
 			this.addressmode = this.addressmodes[this.mode]
 			this.stepinfo = new stepInfo()
 			this.pagecrossed = null
 			
-			switch(this.addressmode){
-				case "modeAbsolute":
-					this.newpc = (parseInt(this.CPU.PC) + 1)
-					this.stepinfo.address = this.Read16(this.newpc)
-					break
-				case "modeAbsoluteX":
-					this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.X
-					this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.X,this.stepinfo.address)
-					break
-				case "modeAbsoluteY":
-					this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.Y
-					this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.Y,this.stepinfo.address)
-					break
-				case "modeAccumulator":
-					this.stepinfo.address = 0
-					break
-				case "modeImmediate":
-					this.stepinfo.address = this.CPU.PC + 1
-					break
-				case "modeImplied":
-					this.stepinfo.address = 0
-					break
-				case "modeIndexedIndirect":
-					this.stepinfo.address = this.read16bug((this.mapper.Read(this.CPU.PC+1))+this.CPU.X)
-					break
-				case "modeIndirect":
-					this.stepinfo.address = this.read16bug(this.Read16(this.CPU.PC + 1))
-					break
-				case "modeIndirectIndexed":
-					this.stepinfo.address = this.read16bug((this.mapper.Read(this.CPU.PC+1)) + this.CPU.Y)
-					this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.Y, this.stepinfo.address)
-					break
-				case "modeRelative":
-					this.offset = parseInt(this.mapper.Read(this.CPU.PC + 1))
-					print(this.CPU.PC)
-					print(this.offset)
-					if(this.offset < 0x80){
-						this.stepinfo.address = this.CPU.PC + 2 + this.offset
-					}
-					else{
-						this.stepinfo.address = this.CPU.PC + 2 + this.offset - 0x100
-					}
-					
-					break
-				case "modeZeroPage":
-					this.stepinfo.address = this.mapper.Read(this.CPU.PC + 1)
-					break
-				case "modeZeroPageX":
-					this.stepinfo.address = this.mapper.Read((this.CPU.PC+1)+this.CPU.X) & 0xff
-					break
-				case "modeZeroPageY":
-					this.stepinfo.address = this.mapper.Read((this.CPU.PC+1)+this.CPU.Y) & 0xff
-					break
+			if (this.addressmode == "modeAbsolute"){
+				this.newpc = (parseInt(this.CPU.PC) + 1)
+				this.stepinfo.address = this.Read16(this.newpc)
 			}
+			else if(this.addressmode == "modeAbsoluteX" ) {
+				this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.X
+				
+				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.X,this.stepinfo.address)
+			}	
+			else if(this.addressmode == "modeAbsoluteY") {
+				this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.Y
+				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.Y,this.stepinfo.address)
+			}
+			else if(this.addressmode == "modeAccumulator"){
+				this.stepinfo.address = 0
+			}
+			else if(this.addressmode == "modeImmediate"){
+				this.stepinfo.address = this.CPU.PC + 1
+			}
+			else if(this.addressmode ==  "modeImplied"){
+				this.stepinfo.address = 0
+			}
+			else if(this.addressmode == "modeIndexedIndirect"){
+				this.stepinfo.address = this.read16bug((this.mapper.Read(this.CPU.PC+1))+this.CPU.X)
+			}
+			else if(this.addressmode == "modeIndirect"){
+				this.stepinfo.address = this.read16bug(this.Read16(this.CPU.PC + 1))
+			}
+			else if(this.addressmode == "modeIndirectIndexed"){
+				this.stepinfo.address = this.read16bug((this.mapper.Read(this.CPU.PC+1)) + this.CPU.Y)
+				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.Y, this.stepinfo.address)
+			}
+			else if(this.addressmode == "modeRelative"){
+				this.offset = parseInt(this.mapper.Read(this.CPU.PC + 1))
+
+				if(this.offset < 0x80){
+					print("mode 1")
+					this.stepinfo.address = this.CPU.PC + 2 + this.offset
+				}
+				else{
+					print("mode 2")
+					this.stepinfo.address = this.CPU.PC + 2 + this.offset - 0x100
+				}
+			}
+			else if(this.addressmode == "modeZeroPage"){
+				this.stepinfo.address = this.mapper.Read(this.CPU.PC + 1)
+			}
+			else if(this.addressmode == "modeZeroPage"){
+				this.stepinfo.address = this.mapper.Read((this.CPU.PC+1)+this.CPU.X) & 0xff
+			}
+			else if(this.addressmode == "modeZeroPageY"){
+				this.stepinfo.address = this.mapper.Read((this.CPU.PC+1)+this.CPU.Y) & 0xff
+			}
+
+					
 			this.CPU.PC += this.instructionsizes[this.opcode]
 			this.CPU.Cycles += this.instructionsizes[this.opcode]
 			if(this.pagecrossed){
@@ -354,6 +357,7 @@ class NESCPU{
 			this.stepinfo = new stepInfo(this.stepinfo.address, this.CPU.PC,this.mode)
 		
 			this.instructname = this.instructionnames[this.opcode]
+
 			print("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode)
 			this.instructname = this.instructname.toLowerCase()
 
@@ -404,7 +408,7 @@ class NESCPU{
 	
 		and(info){
 			this.CPU.A = this.CPU.A & this.mapper.Read(info.address)
-			print(this.CPU.A)
+			print(this.mapper.Read(info.address))
 			this.setZN(this.CPU.A)
 		}
 	
@@ -425,7 +429,10 @@ class NESCPU{
 		}
 	
 		beq(info){
+			print(info)
 			if(this.CPU.Z != 0 ){
+				print("branching")
+				print(info.address)
 				this.CPU.PC = info.address
 				this.addBranchCycles(info)
 			}
