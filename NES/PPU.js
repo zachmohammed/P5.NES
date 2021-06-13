@@ -208,7 +208,25 @@ class NESPPU {
     ////do
     ///do
     readData(){
-        value = this.read
+        this.value = this.mapper.Read(this.ppu.v)
+
+
+        if(this.ppu.v&0x4000 < 0x3F000){
+            this.buffered = this.ppu.bufferedData
+            this.bufferedData = this.value
+            this.value = this.buffered
+        }
+        else{
+            this.ppu.bufferedData = this.mapper.Read(this.ppu.v - 0x1000)
+        }
+
+        if(this.ppu.flagIncrement == 0){
+            this.ppu.v += 1
+        }
+        else{
+            this.ppu.v += 32
+        }
+        return this.value
     }
 
     writeData(value){
@@ -428,7 +446,128 @@ class NESPPU {
     }
 
     fetchSpritePattern(i, row){
+       this.tile = this.oamData[i*4+1]
+       this.attributes = this.oamData[i*4+2]
+       
+       this.address = null
+
+       if(this.flagSpriteSize == 0){
+           if(this.attributes%0x80 == 0x80){
+               row = 7 - row
+           }
+           this.table = this.flagSpriteTable
+           this.address = 0x1000*this.table + this.tile*16 + row
+       }
+       else{
+           if(this.attributes&0x80 == 0x80){
+               row = 15 - row
+           }
+           this.table = this.tile & 1
+           this.tile &= 0xFE
+           if(row > 7){
+               this.tile++
+               row -= 8
+           }
+           this.address = 0x1000*this.table+this.tile*16+row
+       }
+       this.a = (this.attributes & 3) << 2
+       this.lowTileByte = this.mapper.Read(address)
+       this.highTileByte = this.mapper.Read(adddress + 8)
+       this.data = this.data
+       for(i = 0; i < 8; i++){
+           this.p1,this.p2 = null
+           if(this.attributes&0x40 == 0x40){
+               this.p1 = (this.lowTileByte & 1) << 0
+               this.p2 = (this.highTileByte & 1) << 1
+               this.lowTileByte >>= 1
+               this.highTileByte >>= 1
+           }
+           else{
+               this.p1 = (this.lowTileByte & 0x80) >> 7
+               this.p2 = (this.highTileByte & 0x80) >> 6
+               this.lowTileByte <<= 1
+               this.highTileByte <<= 1
+           }
+           this.data <<= 4
+           
+           this.data = (this.a | this.p1 | this.p2)
+       }
+       return data
+    }
+
+    evaluateSprites(){
+        this.h = null
+        if(this.flagSpriteSize ==0){
+            this.h = 8
+        }
+        else{
+            this.h = 16
+        }
+        this.count = 0
+
+        for(i = 0; i < 64; i++){
+            this.y = this.oamData[i*4+0]
+            this.a = this.oamData[i*4+2]
+            this.x = this.oamData[i*4+3]
+            this.row = this.scanline - this.y
+
+            if(this.row < 0 || this.row >= this.h){
+                continue
+            }
+            if(this.count < 8){
+                this.spritePatterns[count] = this.fetchSpritePattern(i, this.row)
+                this.spritePositions[count] = this.x
+                this.spritePriorities[count] = (this.a >> 5) & 1
+                this.spriteIndexes[count] = i
+            }
+            count++
+        }
+        if(this.count > 8){
+            this.count = 8
+            this.flagSpriteOverflow = 1
+        }
+        this.spriteCount = this.count
+    }
+    tick(){
+        if(this.nmiDelay > 0){
+            this.nmiDelay--
+            if(this.nmiDelay == 0 && this.nmiOutput && this.nmiOccurred){
+                this.localcpu.triggerNMI()
+            }
+        }
+
+        if(this.flagShowsBackground != 0 || this.flagShowSprites != 0){
+            if(this.f == 1 && this.scanline == 261 && this.cycle == 339){
+                this.cycle = 0
+                this.scanline = 0
+                this.frame++
+                this.f ^= 1
+            }
+        }
+        this.cycle++
+
+        if(this.cycle > 340){
+            this.cycle = 0
+            this.scanline++
+            if(this.scanline > 261){
+                this.scanline = 0
+                this.frame++
+                this.f ^= 1
+            }
+        }
+    }
+
+    step(){
+        this.tick()
+
+        this.renderingEnabled = this.flagShowsBackground != 0 || this.flagShowSprites !=0
+        this.preLine = this.scanline == 261
+        this.visibleLine = this.scanline < 240
+
+        this.renderLine = this.preLine || this.visibleLine
+
         
+
     }
 
 }
