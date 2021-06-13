@@ -327,15 +327,27 @@ class NESCPU{
 			}
 			else if(this.addressmode == "modeRelative"){
 				this.offset = parseInt(this.mapper.Read(this.CPU.PC + 1))
-
+		
 				if(this.offset < 0x80){
-					print("mode 1")
-					this.stepinfo.address = this.CPU.PC + 2 + this.offset
+					print("Mode 1")
+					this.stepinfo.address = this.CPU.PC + 2 +this.offset
 				}
 				else{
-					print("mode 2")
+					print("Mode 2")
 					this.stepinfo.address = this.CPU.PC + 2 + this.offset - 0x100
 				}
+				print("address" +this.stepinfo.address)
+
+				/*
+				print("offset: " + this.offset)
+				if(this.offset & 0x80){
+					
+					this.offset = this.offset | 0xff00
+					print("Location:" +this.offset)
+
+				}
+				this.stepinfo.address = this.offset
+				*/
 			}
 			else if(this.addressmode == "modeZeroPage"){
 				this.stepinfo.address = this.mapper.Read(this.CPU.PC + 1)
@@ -358,7 +370,7 @@ class NESCPU{
 		
 			this.instructname = this.instructionnames[this.opcode]
 
-			print("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode)
+			print("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode + ", PC: " + this.CPU.PC)
 			this.instructname = this.instructname.toLowerCase()
 
 
@@ -387,7 +399,7 @@ class NESCPU{
 			this.a = this.CPU.A
 			this.b = this.mapper.Read(info.address)
 			this.c = this.CPU.C
-			this.CPU.A = a + b + C
+			this.CPU.A = this.a + this.b + this.C
 
 			this.setZN(this.CPU.A)
 
@@ -398,7 +410,7 @@ class NESCPU{
 				this.CPU.C = 0
 			}
 
-			if ((a^b)&0x80 == 0 && (a^this.CPU.A)&0x80  != 0){
+			if ((this.a^this.b)&0x80 == 0 && (a^this.CPU.A)&0x80  != 0){
 				this.CPU.V = 1
 			}
 			else{
@@ -429,11 +441,9 @@ class NESCPU{
 		}
 	
 		beq(info){
-			print(info)
+
 			if(this.CPU.Z != 0 ){
-				print("branching")
-				print(info.address)
-				this.CPU.PC = info.address
+				//this.CPU.PC = info.address
 				this.addBranchCycles(info)
 			}
 		}
@@ -455,14 +465,14 @@ class NESCPU{
 		bne(info){
 			if(this.CPU.Z == 0 ){
 				this.CPU.PC = info.address
-				addBranchCycles(info)
+				this.addBranchCycles(info)
 			}
 		}
 	
 		bpl(info){
 			if(this.CPU.N == 0){
 				this.CPU.PC = info.address
-				addBranchCycles(info)
+				this.addBranchCycles(info)
 			}
 		}
 	
@@ -527,12 +537,12 @@ class NESCPU{
 	
 		dex(info){
 			this.CPU.X--
-			setZN(this.CPU.X)
+			this.setZN(this.CPU.X)
 		}
 	
 		dey(info){
 			this.CPU.Y--
-			setZN(this.CPU.Y)
+			this.setZN(this.CPU.Y)
 		}
 	
 	
@@ -554,7 +564,7 @@ class NESCPU{
 	
 		iny(info){
 			this.CPU.Y++
-			this.setZN(this.this.CPU.Y)
+			this.setZN(this.CPU.Y)
 		}
 	
 		jmp(info){
@@ -584,7 +594,20 @@ class NESCPU{
 			this.setZN(this.CPU.Y)
 		}
 	
-		//Add LSR
+		lsr(info){
+			if(info.mode == "modeAccumulator"){
+				this.CPU.C = this.CPU.A & 1
+				this.CPU.A >>= 1
+				this.setZN(this.CPU.A)
+			}
+			else{
+				this.value = this.mapper.Read(info.address)
+				this.CPU.C = this.value & 1
+				this.value >>= 1
+				this.mapper.Write(info.address, this.value)
+				this.setZN(this.value)
+			}
+		}
 	
 		nop(info){
 	
@@ -595,23 +618,35 @@ class NESCPU{
 			this.setZN(this.CPU.A)
 		}
 	
-		//Add PHA
+		pha(info){
+			this.push(this.CPU.A)
+		}
 	
 		php(info){
 			this.push(this.flags() | 0x10)
 		}
 	
-		//Add PLA
+		pla(info){
+			this.CPU.A = this.pull()
+			this.setZN(this.CPU.A)
+		}
 	
-		//Add PLP
+		plp(info){
+			this.setflags(this.pull()&0xEF | 0x20)
+		}
 	
 		//Add ROL
 	
 		//Add ROR
 	
-		//Add RTI
+		rti(info){
+			this.setflags(this.pull()&0xEF | 0x20)
+			this.CPU.PC = this.pull16() + 1
+		}
 	
-		//Add RTS
+		rts(info){
+			this.CPU.PC = this.pull16() + 1
+		}
 	
 		sbc(info){
 			this.a = this.CPU.A
@@ -663,7 +698,7 @@ class NESCPU{
 		}
 	
 		tax(info){
-			this.this.CPU.X = this.CPU.A
+			this.CPU.X = this.CPU.A
 			this.setZN(this.CPU.X)
 		}
 	
