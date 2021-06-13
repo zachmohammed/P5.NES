@@ -1,7 +1,7 @@
 let graphics;
 function preload(){
     var reader = new FileReader();
-    rom = loadBytes("Donkey Kong.nes");
+    rom = loadBytes("pong1.nes");
     
 }
 function setup() {
@@ -20,10 +20,23 @@ function setup() {
     ppu.localcpu = this.cpu
     ppu.mapper = ppumem
     cpu.reset()
+    ppu.reset()
+
+}
+
+function step(ppu, cpu){
+    cpuCycles = this.cpu.step()
+    ppuCycles = cpuCycles * 3
+    for(i = 0; i< ppuCycles; i++){
+       this.ppu.step()
+
+    }
+
+    return cpuCycles
 }
   
 function draw() {
-    //cpu.step()
+    step(ppu,cpu)
     background(220);
     noStroke()
     

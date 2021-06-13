@@ -71,7 +71,9 @@ class NESPPU {
         this.cycle = 340
         this.scanline = 240
         this.frame = 0
-
+        this.writeControl(0)
+        this.writeMask(0)
+        this.writeOamAddress(0)
     }
 
     readPalette(address){
@@ -107,6 +109,8 @@ class NESPPU {
     writeRegister(address, value){
         this.register = value
         if(address == 0x2000){
+            print("Write Control")
+            print(value)
             this.writeControl(value)
         }
         else if(address == 0x2001){
@@ -172,7 +176,11 @@ class NESPPU {
     }
 
     readOAMData(){
-        return this.oamData[this.oamAddress]
+        data = this.oamData[this.oamAddress]
+        if((this.oamAddress & 0x03) == 0x02){
+            data = data & 0xE3
+        }
+        return data
     }
     writeOamData(value){
         this.oamData[this.oamAddress] = value
@@ -321,8 +329,8 @@ class NESPPU {
     }
 
     fetchNameTableByte(){
-        address = 0x2000 | (this.v & 0x0FFF)
-        this.nameTableByte = this.mapper.Read(address)
+        this.address = 0x2000 | (this.v & 0x0FFF)
+        this.nameTableByte = this.mapper.Read(this.address)
     }
 
     fetchAttributeTableByte(){
@@ -397,7 +405,7 @@ class NESPPU {
     }
 
     renderPixel(){
-        this.x = this.Cycle - 1
+        this.x = this.cycle - 1
         this.y = this.scanline
 
         this.background = this.backgroundPixel()
@@ -441,7 +449,8 @@ class NESPPU {
         
         
         this.c = this.palette.colourdict[((this.color%64).toString())]
-        this.back.push([this.x, this.y, this.cs])
+        print("Pixel:" + this.x, this.y, this.c)
+        this.back.push([this.x, this.y, this.c])
 
     }
 
@@ -563,10 +572,87 @@ class NESPPU {
         this.renderingEnabled = this.flagShowsBackground != 0 || this.flagShowSprites !=0
         this.preLine = this.scanline == 261
         this.visibleLine = this.scanline < 240
-
+        print(this.flagShowsBackground, this.flagShowSprites)
         this.renderLine = this.preLine || this.visibleLine
 
-        
+        this.preFetchCycle = this.cycle >= 321 && this.cycle <= 336
+        this.visibleCycle = this.cycle >= 1 && this.cycle <= 256
+        this.fetchCycle = this.preFetchCycle || this.visibleCycle
+        if(this.renderingEnabled){
+            if(this.visibleLine && this.visibleCycle){
+                this.renderPixel()
+            }
+            if(this.renderLine && this.fetchCycle){
+                this.tileData <<= 4
+                if((this.cycle % 8) == 1) {
+                    print("Fetching name table byte")
+                    this.fetchNameTableByte()
+                }
+                else if((this.cycle % 8) == 3) {
+                    print("Fetching Attribute table byte")
+                    this.fetchAttributeTableByte()
+                }
+                else if((this.cycle % 8) == 5) {
+                    print("Low t byte")
+                    this.fetchLowTileByte()
+                }
+                else if((this.cycle % 8) == 7) {
+                    print("H t byte")
+                    this.fetchHighTileByte()
+                }
+                else if((this.cycle % 8) == 0) {
+                    print("Store tile data")
+                    this.storeTileData()
+                }
+            }
+
+            if(this.preLine && this.cycle >= 280 && this.cycle <= 304){
+                print("copy y")
+                this.copyY()
+            }
+
+            if(this.renderLine){
+                if(this.fetchCycle && this.cycle&8 == 0){
+                    print("Inc x")
+                    this.incrementX()
+                }
+
+                if(this.cycle == 256){
+                    print("Inc y")
+                    this.incrementY()
+                }
+
+                if(this.cycle == 257){
+                    print("copy x")
+                    this.copyX()
+                }
+            }
+        }
+
+        if(this.renderingEnabled){
+            if(this.cycle == 257){
+                if(this.visibleLine){
+                    print("eval sprites")
+                    this.evaluateSprites()
+                }
+                else{
+                    this.spriteCount = 0
+                }
+            }
+        }
+
+        if(this.scanline == 241 && this.cycle == 1){
+            print("Set v blank")
+            this.setVerticalBlank()
+        }
+        if(this.preLine && this.cycle == 1){
+            print("clear v blank")
+            this.clearVerticalBlank()
+            this.flagSpriteZeroHit = 0
+            this.flagSpriteOverflow = 0
+        }
+
+
 
     }
 

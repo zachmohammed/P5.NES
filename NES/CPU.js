@@ -137,7 +137,7 @@ class NESCPU{
 
 		reset(){
 
-			this.CPU.PC = 0xC79E
+			this.CPU.PC = this.Read16(0xFFFC)
 			this.SP = 0xFD
 			this.setflags(0x24)
 			//set flags
@@ -329,15 +329,11 @@ class NESCPU{
 				this.offset = parseInt(this.mapper.Read(this.CPU.PC + 1))
 		
 				if(this.offset < 0x80){
-					print("Mode 1")
 					this.stepinfo.address = this.CPU.PC + 2 +this.offset
 				}
 				else{
-					print("Mode 2")
 					this.stepinfo.address = this.CPU.PC + 2 + this.offset - 0x100
 				}
-				print("address" +this.stepinfo.address)
-
 				/*
 				print("offset: " + this.offset)
 				if(this.offset & 0x80){
@@ -376,6 +372,7 @@ class NESCPU{
 
 
 			eval("this." +this.instructname + "(this.stepinfo)")
+			return this.CPU.Cycles - this.cycles
 		}
 
 	
@@ -420,7 +417,6 @@ class NESCPU{
 	
 		and(info){
 			this.CPU.A = this.CPU.A & this.mapper.Read(info.address)
-			print(this.mapper.Read(info.address))
 			this.setZN(this.CPU.A)
 		}
 	
@@ -443,7 +439,7 @@ class NESCPU{
 		beq(info){
 
 			if(this.CPU.Z != 0 ){
-				//this.CPU.PC = info.address
+				this.CPU.PC = info.address
 				this.addBranchCycles(info)
 			}
 		}
@@ -457,6 +453,7 @@ class NESCPU{
 	
 		bit(info){
 			this.value = this.mapper.Read(info.address)
+			print(this.value)
 			this.CPU.v = (this.value >> 6) & 1
 			this.setZ(this.value & this.CPU.A)
 			this.setN(this.value)
@@ -541,7 +538,7 @@ class NESCPU{
 		}
 	
 		dey(info){
-			this.CPU.Y--
+			this.CPU.Y = (this.CPU.Y -1) & 0xff
 			this.setZN(this.CPU.Y)
 		}
 	
@@ -558,12 +555,13 @@ class NESCPU{
 		}
 	
 		inx(info){
-			this.CPU.X++
+			this.CPU.X = (this.CPU.X + 1) & 0xff
+			print(this.CPU.X)
 			this.setZN(this.CPU.X)
 		}
 	
 		iny(info){
-			this.CPU.Y++
+			this.CPU.X = (this.CPU.Y + 1) & 0xff
 			this.setZN(this.CPU.Y)
 		}
 	
@@ -577,8 +575,7 @@ class NESCPU{
 		}
 	
 		lda(info){
-			print("Address: " + info.address)
-			print("A: " +this.mapper.Read(info.address))
+
 			this.CPU.A = this.mapper.Read(info.address)
 			
 			this.setZN(this.CPU.A)
@@ -591,6 +588,7 @@ class NESCPU{
 	
 		ldy(info){
 			this.CPU.Y = this.mapper.Read(info.address)
+			//print(this.CPU.Y)
 			this.setZN(this.CPU.Y)
 		}
 	
