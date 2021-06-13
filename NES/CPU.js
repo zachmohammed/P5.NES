@@ -298,8 +298,8 @@ class NESCPU{
 				this.stepinfo.address = this.Read16(this.newpc)
 			}
 			else if(this.addressmode == "modeAbsoluteX" ) {
-				this.stepinfo.address = this.Read16(this.CPU.PC+1) + this.CPU.X
-				
+				this.stepinfo.address = this.Read16(this.CPU.PC+1) + parseInt(this.CPU.X)
+				print(this.stepinfo.address)
 				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.X,this.stepinfo.address)
 			}	
 			else if(this.addressmode == "modeAbsoluteY") {

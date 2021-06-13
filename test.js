@@ -16,9 +16,8 @@ function setup() {
     ppu = new NESPPU(null, null, new paletteTable())
     cpumem = new cpumemory(ram, mapper, ppu)
     cpu = new NESCPU(cpumem)
-    ppumem = new ppumemory(mapper, romfile, ppu)
     ppu.localcpu = this.cpu
-    ppu.mapper = ppumem
+    ppu.mapper = new ppumemory(mapper, romfile, ppu)
     cpu.reset()
     ppu.reset()
 
