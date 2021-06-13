@@ -35,9 +35,15 @@ function step(ppu, cpu){
 }
   
 function draw() {
-    //step(ppu,cpu)
-    background(220);
-    noStroke()
+    step(ppu,cpu)
+    background(240);
+    
+    for(i = 0; i < ppu.back.length; i++){
+        rect(ppu.back[i][0],ppu.back[i][1],1,1)
+        
+    }
+    
+    
     
     
 }

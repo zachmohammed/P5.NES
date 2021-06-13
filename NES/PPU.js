@@ -108,9 +108,9 @@ class NESPPU {
     
     writeRegister(address, value){
         this.register = value
-        print("Reg address:" + address)
+        //print("Reg address:" + address)
         if(address == 0x2000){
-            print("Write Control")
+            //print("Write Control")
             //print(value)
             this.writeControl(value)
         }
@@ -455,8 +455,9 @@ class NESPPU {
         
         
         this.c = this.palette.colourdict[((this.color%64).toString())]
-        print("Pixel:" + this.x, this.y, this.c)
+        //print("Pixel:" + this.x, this.y, this.c)
         this.back.push([this.x, this.y, this.c])
+        print(this.back)
 
     }
 
@@ -504,7 +505,7 @@ class NESPPU {
                this.highTileByte <<= 1
            }
            this.data <<= 4
-           print(this.data)
+           //print(this.data)
            this.data = (this.a | this.p1 | this.p2)
        }
        return this.data
@@ -578,7 +579,7 @@ class NESPPU {
         this.renderingEnabled = this.flagShowsBackground != 0 || this.flagShowSprites !=0
         this.preLine = this.scanline == 261
         this.visibleLine = this.scanline < 240
-        print(this.flagShowsBackground, this.flagShowSprites)
+        //print(this.flagShowsBackground, this.flagShowSprites)
         this.renderLine = this.preLine || this.visibleLine
 
         this.preFetchCycle = this.cycle >= 321 && this.cycle <= 336
@@ -591,45 +592,45 @@ class NESPPU {
             if(this.renderLine && this.fetchCycle){
                 this.tileData <<= 4
                 if((this.cycle % 8) == 1) {
-                    print("Fetching name table byte")
+                    //print("Fetching name table byte")
                     this.fetchNameTableByte()
                 }
                 else if((this.cycle % 8) == 3) {
-                    print("Fetching Attribute table byte")
+                    //print("Fetching Attribute table byte")
                     this.fetchAttributeTableByte()
                 }
                 else if((this.cycle % 8) == 5) {
-                    print("Low t byte")
+                    //print("Low t byte")
                     this.fetchLowTileByte()
                 }
                 else if((this.cycle % 8) == 7) {
-                    print("H t byte")
+                    //print("H t byte")
                     this.fetchHighTileByte()
                 }
                 else if((this.cycle % 8) == 0) {
-                    print("Store tile data")
+                    //print("Store tile data")
                     this.storeTileData()
                 }
             }
 
             if(this.preLine && this.cycle >= 280 && this.cycle <= 304){
-                print("copy y")
+                //print("copy y")
                 this.copyY()
             }
 
             if(this.renderLine){
                 if(this.fetchCycle && this.cycle&8 == 0){
-                    print("Inc x")
+                    //print("Inc x")
                     this.incrementX()
                 }
 
                 if(this.cycle == 256){
-                    print("Inc y")
+                    //print("Inc y")
                     this.incrementY()
                 }
 
                 if(this.cycle == 257){
-                    print("copy x")
+                    //print("copy x")
                     this.copyX()
                 }
             }
@@ -638,7 +639,7 @@ class NESPPU {
         if(this.renderingEnabled){
             if(this.cycle == 257){
                 if(this.visibleLine){
-                    print("eval sprites")
+                   // print("eval sprites")
                     this.evaluateSprites()
                 }
                 else{
@@ -648,11 +649,11 @@ class NESPPU {
         }
 
         if(this.scanline == 241 && this.cycle == 1){
-            print("Set v blank")
+            //print("Set v blank")
             this.setVerticalBlank()
         }
         if(this.preLine && this.cycle == 1){
-            print("clear v blank")
+           // print("clear v blank")
             this.clearVerticalBlank()
             this.flagSpriteZeroHit = 0
             this.flagSpriteOverflow = 0

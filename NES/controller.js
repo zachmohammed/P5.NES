@@ -6,6 +6,6 @@ class controller{
     }
     
     step(){
-        if(keyCode)
+
     }
 }

@@ -35,7 +35,7 @@ class cpumemory{
     
     Write(address, value){
         if(address < 0x2000){
-            print("Storing in RAM")
+            //print("Storing in RAM")
             this.ram[address%0x0800] = value
         }
         else if(address < 0x4000){
