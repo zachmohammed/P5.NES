@@ -50,7 +50,7 @@ class mapperobject1{
             this.romfile.sram[index] = this.hexvalue
         }
         else{
-            print("Fail writing at: " + address)
+            print("Fail writing at: " + address + "value: "+  value)
         }
     }
 }

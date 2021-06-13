@@ -129,7 +129,7 @@ class NESCPU{
 			N:0,
 			interrupt:"",
 			stall:0,
-			
+			rtslo:0,
 			//add table
 		}
 		
@@ -189,20 +189,25 @@ class NESCPU{
 	
 		pull(){
 			this.CPU.SP++
+			print("Data has been pulled!")
 			return cpu.mapper.Read(0x100 | this.CPU.SP)
 		}
 	
 		push16(value){
 			this.hi = value >> 8
 			this.lo = value & 0xFF
+			
 			this.push(this.hi)
 			this.push(this.lo)
+			this.CPU.rtslo = (this.pull16())
 		}
 	
 		pull16(){
-			lo = this.pull()
-			high = this.pull()
-			return hi<<8 | lo
+		
+			this.lo = this.pull()
+			this.high = this.pull()
+
+			return this.hi<<8 | this.lo
 		}
 
 		setflags(flags){
@@ -299,7 +304,7 @@ class NESCPU{
 			}
 			else if(this.addressmode == "modeAbsoluteX" ) {
 				this.stepinfo.address = this.Read16(this.CPU.PC+1) + parseInt(this.CPU.X)
-				print(this.stepinfo.address)
+				print("Address: " + this.stepinfo.address)
 				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.X,this.stepinfo.address)
 			}	
 			else if(this.addressmode == "modeAbsoluteY") {
@@ -379,7 +384,7 @@ class NESCPU{
 		nmi(){
 			this.push16(this.CPU.PC)
 			//php add
-			this.CPU.PC = this.mapper.Read16(0xFFFA)
+			this.CPU.PC = this.Read16(0xFFFA)
 			this.CPU.I = 1
 			this.CPU.Cycles += 7
 		}
@@ -387,7 +392,7 @@ class NESCPU{
 		irq(){
 			this.push16(tihs.CPU.PC)
 			//add php
-			this.CPU.PC = this.mapper.Read16(0xFFFE)
+			this.CPU.PC = this.Read16(0xFFFE)
 			this.CPU.I = 1
 			this.CPU.Cycles += 7
 		}
@@ -453,7 +458,7 @@ class NESCPU{
 	
 		bit(info){
 			this.value = this.mapper.Read(info.address)
-			print(this.value)
+			print("Bit value: " +this.value)
 			this.CPU.v = (this.value >> 6) & 1
 			this.setZ(this.value & this.CPU.A)
 			this.setN(this.value)
@@ -556,7 +561,7 @@ class NESCPU{
 	
 		inx(info){
 			this.CPU.X = (this.CPU.X + 1) & 0xff
-			print(this.CPU.X)
+			print("X: "+ this.CPU.X)
 			this.setZN(this.CPU.X)
 		}
 	
@@ -571,6 +576,7 @@ class NESCPU{
 	
 		jsr(info){
 			this.push16(this.CPU.PC - 1)
+
 			this.CPU.PC = info.address
 		}
 	
@@ -633,17 +639,33 @@ class NESCPU{
 			this.setflags(this.pull()&0xEF | 0x20)
 		}
 	
-		//Add ROL
+		rol(info){
+			if(info.mode == "modeAccumulator"){
+				this.c = this.CPU.C
+				this.CPU.C = (this.CPU.A >> 7) & 1
+				this.CPU.A = (this.CPU.A << 1) | this.c
+				this.setZN(this.CPU.A)
+			}
+			else{
+				this.c = this.CPU.C
+				this.value = this.mapper.Read(info.address)
+				this.c = (this.value >> 7) & 1
+				this.value = (this.value << 1) | this.c
+				this.mapper.Write(info.address, this.value)
+				this.setZN(this.value)
+			}
+		}
 	
 		//Add ROR
 	
 		rti(info){
 			this.setflags(this.pull()&0xEF | 0x20)
-			this.CPU.PC = this.pull16() + 1
+			this.CPU.PC = this.CPU.rtslo
 		}
 	
 		rts(info){
-			this.CPU.PC = this.pull16() + 1
+			this.CPU.PC = this.CPU.rtslo + 1
+			print("PC AFTER:" + this.CPU.PC)
 		}
 	
 		sbc(info){

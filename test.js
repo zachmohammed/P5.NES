@@ -35,7 +35,7 @@ function step(ppu, cpu){
 }
   
 function draw() {
-    step(ppu,cpu)
+    //step(ppu,cpu)
     background(220);
     noStroke()
     

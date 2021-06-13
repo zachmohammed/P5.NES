@@ -16,7 +16,7 @@ class NESPPU {
         this.front = this.front
         this.back = this.back
 
-        this.v = this.v
+        this.v = 0
         this.t = this.t 
         this.x = this.x
         this.w = this.w 
@@ -99,7 +99,7 @@ class NESPPU {
            return this.readOAMData()
         }
         else if(address == 0x2007){
-            return this.read.readData()
+            return this.readData()
         }
         else{
             return 0
@@ -108,9 +108,10 @@ class NESPPU {
     
     writeRegister(address, value){
         this.register = value
+        print("Reg address:" + address)
         if(address == 0x2000){
             print("Write Control")
-            print(value)
+            //print(value)
             this.writeControl(value)
         }
         else if(address == 0x2001){
@@ -158,6 +159,7 @@ class NESPPU {
     }
 
     readStatus(){
+        /* 
         result = this.register & 0x1F
         result |= this.flagSpriteSize << 5
         result |= this.flagSpriteZeroHit << 6
@@ -169,6 +171,9 @@ class NESPPU {
         this.nmiChange()
         this.w = 0
         return result
+        */
+
+        return 0xFF
     }
 
     writeOamAddress(value){
@@ -216,29 +221,30 @@ class NESPPU {
     ////do
     ///do
     readData(){
-        this.value = this.mapper.Read(this.ppu.v)
+        this.value = this.mapper.Read(this.v)
 
 
-        if(this.ppu.v&0x4000 < 0x3F000){
-            this.buffered = this.ppu.bufferedData
+        if(this.v&0x4000 < 0x3F000){
+            this.buffered = this.bufferedData
             this.bufferedData = this.value
             this.value = this.buffered
         }
         else{
-            this.ppu.bufferedData = this.mapper.Read(this.ppu.v - 0x1000)
+            this.bufferedData = this.mapper.Read(this.v - 0x1000)
         }
 
-        if(this.ppu.flagIncrement == 0){
-            this.ppu.v += 1
+        if(this.flagIncrement == 0){
+            this.v += 1
         }
         else{
-            this.ppu.v += 32
+            this.v += 32
         }
         return this.value
     }
 
     writeData(value){
-        this.mapper.write(this.v, value)
+        print(this.v)
+        this.mapper.Write(this.v, value)
         if(this.flagIncrement == 0){
             this.v += 1
         }
@@ -255,9 +261,9 @@ class NESPPU {
     writeDMA(value){
         this.address = value << 8
         for(i = 0; i < 256; i++){
-            this.oamData[this.oamAddress] = this.mapper.read(address)
+            this.oamData[this.oamAddress] = this.mapper.Read(this.address)
             this.oamAddress++
-            address++
+            this.address++
         }
         this.localcpu.CPU.stall += 513
 
@@ -334,9 +340,9 @@ class NESPPU {
     }
 
     fetchAttributeTableByte(){
-        address = 0x23C0 | (this.v & 0x0C00) | ((this.v >> 4) & 0x38) | ((this.v >> 2) &0x07)
-        shift = ((this.v >> 4) & 4) | (this.v & 2) 
-        this.attributeTableByte = ((this.mapper.Read(address) >> shift) & 3) << 2
+        this.address = 0x23C0 | (this.v & 0x0C00) | ((this.v >> 4) & 0x38) | ((this.v >> 2) &0x07)
+        this.shift = ((this.v >> 4) & 4) | (this.v & 2) 
+        this.attributeTableByte = ((this.mapper.Read(this.address) >> this.shift) & 3) << 2
     }
 
     fetchLowTileByte() {
@@ -480,8 +486,8 @@ class NESPPU {
            this.address = 0x1000*this.table+this.tile*16+row
        }
        this.a = (this.attributes & 3) << 2
-       this.lowTileByte = this.mapper.Read(address)
-       this.highTileByte = this.mapper.Read(adddress + 8)
+       this.lowTileByte = this.mapper.Read(this.address)
+       this.highTileByte = this.mapper.Read(this.address + 8)
        this.data = this.data
        for(i = 0; i < 8; i++){
            this.p1,this.p2 = null
@@ -498,10 +504,10 @@ class NESPPU {
                this.highTileByte <<= 1
            }
            this.data <<= 4
-           
+           print(this.data)
            this.data = (this.a | this.p1 | this.p2)
        }
-       return data
+       return this.data
     }
 
     evaluateSprites(){
@@ -524,12 +530,12 @@ class NESPPU {
                 continue
             }
             if(this.count < 8){
-                this.spritePatterns[count] = this.fetchSpritePattern(i, this.row)
-                this.spritePositions[count] = this.x
-                this.spritePriorities[count] = (this.a >> 5) & 1
-                this.spriteIndexes[count] = i
+                this.spritePatterns[this.count] = this.fetchSpritePattern(i, this.row)
+                this.spritePositions[this.count] = this.x
+                this.spritePriorities[this.count] = (this.a >> 5) & 1
+                this.spriteIndexes[this.count] = i
             }
-            count++
+            this.count++
         }
         if(this.count > 8){
             this.count = 8

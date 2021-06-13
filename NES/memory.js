@@ -9,12 +9,13 @@ class cpumemory{
 
     Read(address){
         if(address < 0x2000){
+            
             return this.ram[address%0x0800]
         }
         else if(address < 0x4000){
             return this.ppu.readRegister(0x2000 + address%8)
         }
-        else if(address < 0x4014){
+        else if(address == 0x4014){
             return this.ppu.readRegister(address)
         }
         else if(address < 0x4015){
@@ -34,9 +35,11 @@ class cpumemory{
     
     Write(address, value){
         if(address < 0x2000){
+            print("Storing in RAM")
             this.ram[address%0x0800] = value
         }
         else if(address < 0x4000){
+            
             this.ppu.writeRegister(0x2000+address%8, value)
         }
         else if(address < 0x4014){
@@ -90,6 +93,7 @@ class ppumemory{
             return this.ppu.nameTableData[this.MirrorAddress(this.mode, address)%0x2048]
         }
         else if(address < 0x4000){
+            print("pallete: " +this.ppu.readPalette(address % 32))
             return this.ppu.readPalette(address % 32)
         }
     }
@@ -107,7 +111,7 @@ class ppumemory{
             this.ppu.writePalette(address%32, value)
         }
         else{
-            print("Failed writing at: " + address)
+            print("Failed writing at: " + address, value)
         }
     }
 
