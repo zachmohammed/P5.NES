@@ -62,7 +62,7 @@ LoadPalettesLoop:
 
 
 
-  LDA #$80
+  LDA #$10
   STA $0200        ; put sprite 0 in center ($80) of screen vert
   STA $0203        ; put sprite 0 in center ($80) of screen horiz
   LDA #$00
