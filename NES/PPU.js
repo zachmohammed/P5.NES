@@ -453,9 +453,10 @@ class NESPPU {
         }
    
         
-        
+ 
         this.c = this.palette.colourdict[((this.color%64).toString())]
-        //print("Pixel:" + this.x, this.y, this.c)
+
+        print("Pixel:" + this.x, this.y, this.c)
         this.back.push([this.x, this.y, this.c])
         //print(this.back)
 
@@ -505,8 +506,9 @@ class NESPPU {
                this.highTileByte <<= 1
            }
            this.data <<= 4
-           //print(this.data)
+           
            this.data = (this.a | this.p1 | this.p2)
+
        }
        return this.data
     }

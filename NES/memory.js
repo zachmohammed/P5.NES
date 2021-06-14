@@ -9,7 +9,7 @@ class cpumemory{
 
     Read(address){
         if(address < 0x2000){
-            print("Reading RAM")
+            //print("Reading RAM")
             return this.ram[address%0x0800]
         }
         else if(address < 0x4000){
@@ -19,13 +19,13 @@ class cpumemory{
             return this.ppu.readRegister(address)
         }
         else if(address < 0x4015){
-            print("APU")
+            //print("APU")
         }
         else if(address < 0x4016){
-            print("Cpntroler 1")
+            //print("Cpntroler 1")
         }
         else if(address < 0x4017){
-            print("Controler 2")
+            //print("Controler 2")
         }
         else if(address >= 0x6000){
             return this.mapper.Read(address)
@@ -35,27 +35,27 @@ class cpumemory{
     
     Write(address, value){
         if(address < 0x2000){
-            print("Storing in RAM")
+           // print("Storing in RAM")
             this.ram[address%0x0800] = value
         }
         else if(address < 0x4000){
-            print("Writing to PPU")
+            //print("Writing to PPU")
             this.ppu.writeRegister(0x2000+address%8, value)
         }
         else if(address < 0x4014){
-            print("APU ")
+            //print("APU ")
         }
         else if(address == 0x4014){
             this.ppu.writeRegister(address, value)
         }
         else if(address < 0x4015){
-            print("APU")
+            //print("APU")
         }
         else if(address < 0x4016){
-            print("Controler")
+            //print("Controler")
         }
         else if(address == 0x4017){
-            print("APU")
+           // print("APU")
         }
         else if(address < 0x6000){
             
@@ -93,7 +93,7 @@ class ppumemory{
             return this.ppu.nameTableData[this.MirrorAddress(this.mode, address)%0x2048]
         }
         else if(address < 0x4000){
-            print("pallete: " +this.ppu.readPalette(address % 32))
+            //print("pallete: " +this.ppu.readPalette(address % 32))
             return this.ppu.readPalette(address % 32)
         }
     }

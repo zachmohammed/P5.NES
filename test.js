@@ -5,7 +5,7 @@ function preload(){
     
 }
 function setup() {
-    createCanvas(400, 400);
+    createCanvas(256, 240);
 
     romfile = LoadNESFile(rom)
     
@@ -35,12 +35,13 @@ function step(ppu, cpu){
 }
   
 function draw() {
+
     step(ppu,cpu)
     background(240);
 
     for(i = 0; i < ppu.back.length; i++){
         noStroke()
-        fill(ppu.back[i][2])
+        fill("#" + ppu.back[i][2])
         rect(ppu.back[i][0],ppu.back[i][1],1,1)
         
     }

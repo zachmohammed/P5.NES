@@ -371,7 +371,7 @@ class NESCPU{
 		
 			this.instructname = this.instructionnames[this.opcode]
 
-			print("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode + ", PC: " + this.CPU.PC)
+			document.getElementById("consolearea").innerHTML += ("Op code: "+this.opcode + ", ins name: " + this.instructname + ", address:" + this.stepinfo.address + ", mode: " + this.addressmode + ", PC: " + this.CPU.PC + "\n")
 			this.instructname = this.instructname.toLowerCase()
 
 
@@ -548,6 +548,7 @@ class NESCPU{
 	
 		dey(info){
 			this.CPU.Y = (this.CPU.Y -1) & 0xff
+			//print(this.CPU.Y)
 			this.setZN(this.CPU.Y)
 		}
 	
@@ -664,13 +665,13 @@ class NESCPU{
 	
 		rti(info){
 			this.setflags(this.pull()&0xEF | 0x20)
-			print("RETURNED PC: " + this.CPU.rtslo - 2)
+			//print("RETURNED PC: " + this.CPU.rtslo - 2)
 			this.CPU.PC = this.CPU.rtslo - 2
 		}
 	
 		rts(info){
 			this.CPU.PC = this.CPU.rtslo + 1
-			print("PC AFTER:" + this.CPU.PC)
+			//print("PC AFTER:" + this.CPU.PC)
 		}
 	
 		sbc(info){
