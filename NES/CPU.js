@@ -189,7 +189,7 @@ class NESCPU{
 	
 		pull(){
 			this.CPU.SP++
-			print("Data has been pulled!")
+			//print("Data has been pulled!")
 			return cpu.mapper.Read(0x100 | this.CPU.SP)
 		}
 	
@@ -199,7 +199,7 @@ class NESCPU{
 			
 			this.push(this.hi)
 			this.push(this.lo)
-			this.CPU.rtslo = (this.pull16())
+			
 		}
 	
 		pull16(){
@@ -304,7 +304,7 @@ class NESCPU{
 			}
 			else if(this.addressmode == "modeAbsoluteX" ) {
 				this.stepinfo.address = this.Read16(this.CPU.PC+1) + parseInt(this.CPU.X)
-				print("Address: " + this.stepinfo.address)
+				//print("Address: " + this.stepinfo.address)
 				this.pagecrossed = this.pagesDiffer(this.stepinfo.address-this.CPU.X,this.stepinfo.address)
 			}	
 			else if(this.addressmode == "modeAbsoluteY") {
@@ -382,8 +382,12 @@ class NESCPU{
 
 	
 		nmi(){
+			//print("NMI PC: " +this.CPU.PC)
 			this.push16(this.CPU.PC)
-			//php add
+			this.CPU.rtslo = (this.pull16())
+			//print("Ruturn PC:" + this.CPU.rtslo)
+			this.php(null)
+			
 			this.CPU.PC = this.Read16(0xFFFA)
 			this.CPU.I = 1
 			this.CPU.Cycles += 7
@@ -391,7 +395,7 @@ class NESCPU{
 	
 		irq(){
 			this.push16(tihs.CPU.PC)
-			//add php
+			this.php(null)
 			this.CPU.PC = this.Read16(0xFFFE)
 			this.CPU.I = 1
 			this.CPU.Cycles += 7
@@ -458,7 +462,7 @@ class NESCPU{
 	
 		bit(info){
 			this.value = this.mapper.Read(info.address)
-			print("Bit value: " +this.value)
+			//print("Bit value: " +this.value)
 			this.CPU.v = (this.value >> 6) & 1
 			this.setZ(this.value & this.CPU.A)
 			this.setN(this.value)
@@ -561,7 +565,7 @@ class NESCPU{
 	
 		inx(info){
 			this.CPU.X = (this.CPU.X + 1) & 0xff
-			print("X: "+ this.CPU.X)
+			//print("X: "+ this.CPU.X)
 			this.setZN(this.CPU.X)
 		}
 	
@@ -660,7 +664,8 @@ class NESCPU{
 	
 		rti(info){
 			this.setflags(this.pull()&0xEF | 0x20)
-			this.CPU.PC = this.CPU.rtslo
+			print("RETURNED PC: " + this.CPU.rtslo - 2)
+			this.CPU.PC = this.CPU.rtslo - 2
 		}
 	
 		rts(info){

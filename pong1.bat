@@ -1,2 +1,2 @@
-NESASM3 pong1.asm
+NESASM3 singlesprite.asm
 pause

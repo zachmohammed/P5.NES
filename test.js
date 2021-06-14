@@ -1,7 +1,7 @@
 let graphics;
 function preload(){
     var reader = new FileReader();
-    rom = loadBytes("pong1.nes");
+    rom = loadBytes("sprites.nes");
     
 }
 function setup() {
@@ -39,10 +39,11 @@ function draw() {
     background(240);
     
     for(i = 0; i < ppu.back.length; i++){
+        fill(123,125,234)
         rect(ppu.back[i][0],ppu.back[i][1],1,1)
         
     }
-    
+
     
     
     

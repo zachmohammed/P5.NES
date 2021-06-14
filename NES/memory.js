@@ -9,7 +9,7 @@ class cpumemory{
 
     Read(address){
         if(address < 0x2000){
-            
+            print("Reading RAM")
             return this.ram[address%0x0800]
         }
         else if(address < 0x4000){
@@ -35,11 +35,11 @@ class cpumemory{
     
     Write(address, value){
         if(address < 0x2000){
-            //print("Storing in RAM")
+            print("Storing in RAM")
             this.ram[address%0x0800] = value
         }
         else if(address < 0x4000){
-            
+            print("Writing to PPU")
             this.ppu.writeRegister(0x2000+address%8, value)
         }
         else if(address < 0x4014){

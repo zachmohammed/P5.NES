@@ -243,7 +243,7 @@ class NESPPU {
     }
 
     writeData(value){
-        print(this.v)
+        //print(this.v)
         this.mapper.Write(this.v, value)
         if(this.flagIncrement == 0){
             this.v += 1
@@ -457,7 +457,7 @@ class NESPPU {
         this.c = this.palette.colourdict[((this.color%64).toString())]
         //print("Pixel:" + this.x, this.y, this.c)
         this.back.push([this.x, this.y, this.c])
-        print(this.back)
+        //print(this.back)
 
     }
 
