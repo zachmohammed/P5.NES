@@ -8,7 +8,10 @@
       max-height: 100px;
       min-width: 700px;
       min-height: 100px;
+      margin-right: 10000px;
     }
+    
+ 
   </style>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.js"></script>
@@ -28,11 +31,13 @@
 
   </head>
   <body>
-    
     <script src="test.js"></script>
+    
     
 
     <textarea id="consolearea"> </textarea>
-
+    <input type="file"
+    id="rom" name="rom"
+    accept=".nes" onload="get_rom()">
   </body>
 </html>
