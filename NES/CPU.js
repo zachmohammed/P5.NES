@@ -134,6 +134,7 @@ class NESCPU{
 		}
 		
 	}
+		
 
 		reset(){
 
@@ -377,6 +378,7 @@ class NESCPU{
 
 
 			eval("this." +this.instructname + "(this.stepinfo)")
+			display_cpu_flags()
 			return this.CPU.Cycles - this.cycles
 		}
 

@@ -18,7 +18,7 @@ class mapperobject1{
         else if(readaddress >= 0xC000){
             //print("Reading PRG 1")
             this.index = this.prgBank2*0x4000 + parseInt(readaddress-0xC000)
-            return (this.romfile.prg[this.index])
+            return parseInt(this.romfile.prg[this.index])
         }
     
         else if(readaddress >= 0x8000){

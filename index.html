@@ -4,13 +4,92 @@
     textarea{
       width: 395px;
       height: 100px;
-      max-width: 700px;
-      max-height: 100px;
-      min-width: 700px;
-      min-height: 100px;
+      max-width: 600px;
+      max-height: 300px;
+      min-width: 600px;
+      min-height: 300px;
       margin-right: 10000px;
     }
+    .emu{
+      position: fixed;
+      
+    }
+    .sidebar{
+      position: fixed;
+      right: 00px;
+      bottom: 0px;
+      height: 100%;
+      width: 80px;
+      font-size: 30px;
+      text-align: right;
+      background-color: rgb(65, 60, 124);
+      background-size:cm;
+    }
+    .sidebar a{
+      color:rgb(26, 21, 21);
+      margin-right: 30px;
+      display:inline-block;
+      text-decoration: none;
+      line-height: 25px;
+      padding: 10px 100px 10px 0px;
+    }
+
+    .sidebar a:hover{
+      background-color:cornflowerblue;
+      border-left: 100px;
+      border-left-color: cornflowerblue;
+    }
+    .controlarea{
+      position: relative;
+      bottom:00px;
+      
+      margin-right: 100px;
+    }
+    .flags{
+      position: fixed;
+      top: 10px;
+      left: 270px;
+      bottom:500px;
+    }
+    .popup {
+      position: fixed;
+      right: 80px;
+  
+      top:10px;
+      height:20%;
+      width: 15%;
+    }
+    .popup-header {
+      position: fixed;
+
+      background-color: #5cb85c;
+      top: -30px;
+
+      
+      width: 15%;
+      height: 15%;
+      
+      color: white;
+     
+
+      font-size: 25px;
+      
+      
+    }
+    .popup-body {
+      position: fixed;
+
+      background-color: #09b32e;
+      top:100px;
+      
+      height: 15%;
+      width: 15%;
+      font-size: 20px;
     
+
+
+
+    }
  
   </style>
   <head>
@@ -27,17 +106,81 @@
     <script src="NES/memory.js"></script>
     <script src="NES/palette.js"></script>
     <script src="NES/console.js"></script>
+    <script src="NES/romloading.js"></script>
+    <script src="pagemanager.js"></script>
     <meta charset="utf-8" />
 
   </head>
   <body>
-    <script src="test.js"></script>
     
+    <div class="sidebar">
+      <a onclick="change_pop_up('STA')">STA </a>
+      <br>
+      <a onclick="change_pop_up('STX')">STX</a>
+      <br>
+      <a onclick="change_pop_up('STY')">STY</a>
+      <br>
+      <a onclick="change_pop_up('LDA')">LDA</a>
+      <br>
+      <a onclick="change_pop_up('LDX')">LDX</a>
+      <br>
+      <a onclick="change_pop_up('LDY')">LDY</a>
+      <br>
+      <a onclick="change_pop_up('TAX')">TAX</a>
+      <br>
+      <a onclick="change_pop_up('TAY')">TAY</a>
+      <br>   
+      <a onclick="change_pop_up('INX')">INX</a>
+      <br>
+      <a onclick="change_pop_up('INY')">INY</a>
+      <br>
+      <a onclick="change_pop_up('DEX')">DEX</a>
+      <br>
+      <a onclick="change_pop_up('DEY')">DEY</a>
+      <br>
+      <a onclick="change_pop_up('CMP')">CMP</a>
+      <br>
+      <a onclick="change_pop_up('CPX')">CPX</a>
+      <br>
+      <a onclick="change_pop_up('CPY')">CPY</a>
+      <br>
+      <a onclick="change_pop_up('JMP')">JMP</a>
+      <br>
+      <a onclick="change_pop_up('BEQ')">BEQ</a>
+      <br>
+      <a onclick="change_pop_up('BNE')">BNE</a>
+    </div>
+    
+    <div id="emu">
+      <script src="test.js"></script>
+      
+    </div>
+
+    <div class="flags">
+      <label id="cpuflags" >A: 1 <br>A: 2 </label>
+    </div>  
+      
+
+    <div class="controlarea">
+      <textarea id="consolearea" disabled> </textarea>
+      <input type="file"
+      id="rom" name="rom"
+      accept=".nes" onchange="grab_rom_bytes()">
+    </div>
     
 
-    <textarea id="consolearea"> </textarea>
-    <input type="file"
-    id="rom" name="rom"
-    accept=".nes" onload="get_rom()">
+    <div id="popup" class="popup">
+      <div class="pop-content">
+        <div class="popup-header">
+          <h2 id="popup-header">STX</h2>
+        </div>
+        <div class="popup-body" id="popup-body">
+          <p>o store whatever is currently stored in the X index register into the desired memory location</p>
+        </div>
+
+      </div>
+    
+    </div>
+    
   </body>
 </html>

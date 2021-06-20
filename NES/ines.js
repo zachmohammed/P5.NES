@@ -49,7 +49,7 @@ function LoadNESFile(romdata){
     currentlocation += prg_length
 
     chr = bytearray(GetHex(currentlocation,currentlocation + chr_length - 1,romdata))
- 
+    
     return new NewCartridge(prg,chr,mapper,mirror,battery)
 }
 
