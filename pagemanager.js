@@ -3,6 +3,14 @@ function display_cpu_flags(){
     document.getElementById("cpuflags").innerHTML = "Cycles: " + cpuflags.Cycles + " <br> PC: " + cpuflags.PC + " <br> A: " + cpuflags.A + " <br> X: " + cpuflags.X + " <br> Y:" + cpuflags.Y + " <br> C: " + cpuflags.C + " <br> Z:" + cpuflags.Z + " <br> I: " + cpuflags.I + " <br> D: " + cpuflags.D + " <br> B:" + cpuflags.B + " <br> U:" + cpuflags.U + " <br> V:" + cpuflags.V + " <br> N: " + cpuflags.N 
 
 }
+function toggle_pause(){
+    if(paused == false){
+        paused = true
+    }
+    else{
+        paused = false
+    }
+}
 
 function change_pop_up(in_name){
     header = in_name;

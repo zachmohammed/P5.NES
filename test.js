@@ -2,7 +2,7 @@ let graphics;
 function preload(){
     var reader = new FileReader();
     rom = null
-    
+    paused = false
 }
 function setup() {
     var canva = createCanvas(256, 240);
@@ -28,14 +28,14 @@ function draw() {
         
     }
     else{
-        step(ppu,cpu)
-        
-    
-        for(i = 0; i < ppu.back.length; i++){
-            noStroke()
-            fill("#" + ppu.back[i][2])
-            rect(ppu.back[i][0],ppu.back[i][1],1,1)
-            
-        }
+        if(paused == false){
+            step(ppu,cpu)
+            for(i = 0; i < ppu.back.length; i++){
+                noStroke()
+                fill("#" + ppu.back[i][2])
+                rect(ppu.back[i][0],ppu.back[i][1],1,1)
+                
+            }
+        } 
     }  
 }
