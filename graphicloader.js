@@ -1,21 +1,15 @@
 function loadbin(databytes){
     graphics = databytes;
-    let hexdata = [];
-    let tempstring = "";
-    for (let i = 0; i < 8192; i++) {
-        loadedbyte = graphics.bytes[i].toString(16)
-
-        if(loadedbyte.length == 1){
-            tempstring += "0" + loadedbyte;
+    tempstring = ""
+    hexdata = []
+    for(let i = 0; i < 8192; i++){
+        tempstring += tobinary(hex(parseInt(romfile.chr[i])).slice(6))
+        if(tempstring.length == 128){
+            hexdata.push(tempstring)
+            tempstring = ""
         }
-        else{
-            tempstring += loadedbyte
-        }
-        if(tempstring.length == 32){
-            append(hexdata,tempstring)
-            tempstring = "";
-        } 
     }
+
     return hexdata
 }
 
@@ -73,33 +67,31 @@ function splitstring(string){
     return splitstringresult
 }
 
-function creategraphic(graphicsdata, location){
+function creategraphic(graphicsdata, location, x, y){
     imagedata = loadbin(graphicsdata)
+    datastring = splitstring(imagedata[location])
+    drawspritedata(grabimagedata(datastring[0], datastring[1]), x, y)
 
-    datastring = tobinary(imagedata[location])
-
-    splittedstring = splitstring(datastring)
-
-    dataarray = (grabimagedata(splittedstring[0],splittedstring[1]))
 }
 
-function drawspritedata(dataarray){
+function drawspritedata(dataarray, x, y){
     for(let i = 0; i < 8; i++){
         for(let j = 0; j < 8; j++){
             if(dataarray[i][j] != 0){
+                pg.noStroke()
                 if(dataarray[i][j] == 1){
-                    fill(204,69,50)
+                    pg.fill(204,69,50)
                     
-                    rect(i*4,j* 4,4,4)
+                    pg.rect(i*1 + x,j* 1 + y,1,1)
                 }
                 else if(dataarray[i][j] == 2){
-                    fill(245,176,73)
-                    rect(i* 4,j * 4,4,4)
+                    pg.fill(245,176,73)
+                    pg.rect(i* 1 + x,j * 1+ y,1,1)
                 }
                 if(dataarray[i][j] == 3){
                     
-                    fill(100,100,38)
-                    rect(i * 4,j * 4,4,4)
+                    pg.fill(100,100,38)
+                    pg.rect(i * 1 + x,j * 1 + y,1,1)
                 }
             }
             
